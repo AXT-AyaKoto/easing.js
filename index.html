@@ -1,12 +1,55 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>easing.js test</title>
-    <script type="module" src=""></script>
+    <script type="module" src="./script.js"></script>
 </head>
+
 <body>
-    
+    <h1>easing.js test</h1>
+    <section>
+        <h2>Easing Settings</h2>
+        <ul>
+            <li>
+                <label for="select-type">type</label>
+                <select id="select-type"></select>
+            </li>
+            <li>
+                <label for="select-dir">dir</label>
+                <select id="select-dir"></select>
+            </li>
+        </ul>
+    </section>
+    <section>
+        <h2>Graph Output</h2>
+        <canvas width="1000" height="1000"></canvas>
+    </section>
+    <script>
+        // select要素のoptionを生成
+        const validFunctions = {
+            "types": ["Linear", "Sine", "Quad", "Cubic", "Quart", "Quint", "Expo", "Circ", "Back"],
+            "dirs": ["In", "Out", "InOut", "OutIn"],
+        };
+        const selectType = document.getElementById("select-type");
+        for (const type of validFunctions.types) {
+            const option = document.createElement("option");
+            option.value = type;
+            option.textContent = type;
+            selectType.appendChild(option);
+        }
+        const selectDir = document.getElementById("select-dir");
+        for (const dir of validFunctions.dirs) {
+            const option = document.createElement("option");
+            option.value = dir;
+            option.textContent = dir;
+            selectDir.appendChild(option);
+        }
+        // グラフ描画関数
+        const drawGraph = 
+    </script>
 </body>
+
 </html>

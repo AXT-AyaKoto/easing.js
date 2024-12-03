@@ -3,16 +3,11 @@ import "https://cdn.jsdelivr.net/gh/AXT-AyaKoto/Zahlen.js@v0.7/script.js";
 /** @description - AXT-AyaKoto/easing.js 各機能 (プライベートプロパティを使いたいのでClassにします) */
 const Easing = class Easing {
     /* ======== Private Props ======== */
-    /** @type {{types: string[], dirs: string[]}} - 有効なイージング関数の種類と方向 */
-    static #validFunctions = {
-        "types": ["Linear", "Sine", "Quad", "Cubic", "Quart", "Quint", "Expo", "Circ", "Back"],
-        "dirs": ["In", "Out", "InOut", "OutIn"],
-    }
     /** @type {(str: string) => boolean} - イージング関数名が有効なものかチェック */
     static #isValidFn(str) {
         // typesとdirsの組み合わせがあるかどうかチェックして返す
         const { type, dir } = this.#getTypeDir(str);
-        return this.#validFunctions.types.includes(type) && this.#validFunctions.dirs.includes(dir);
+        return this.validFunctions.types.includes(type) && this.validFunctions.dirs.includes(dir);
     }
     /** @type {(str: string) => {type: string, dir: string}} - イージング関数名からイージングの種類と方向を取得 */
     static #getTypeDir(str) {
@@ -34,66 +29,6 @@ const Easing = class Easing {
         }
         // 有効なら返す
         return name;
-    }
-    /** @type {(name: string) => [number, number, number, number]} - 指定された関数の3次ベジェ曲線の制御点の座標を取得([x1, y1, x2, y2]) */
-    static #getCtrlPoints(name) {
-        const { type, dir } = this.#getTypeDir(name);
-        /** @description - dirによって分岐 */
-        if (dir == "In" || dir == "Out") {
-            /** @type {Object<string, [number, number, number, number]>} - 各typeの"In"の場合の制御点の値 */
-            const ctrlPt_In = {
-                "Linear": [0.00, 0.00, 1.00, 1.00],
-                "Sine": [0.12, 0.00, 0.39, 0.00],
-                "Quad": [0.11, 0.00, 0.50, 0.00],
-                "Cubic": [0.32, 0.00, 0.67, 0.00],
-                "Quart": [0.50, 0.00, 0.75, 0.00],
-                "Quint": [0.64, 0.00, 0.78, 0.00],
-                "Expo": [0.70, 0.00, 0.84, 0.00],
-                "Circ": [0.55, 0.00, 1.00, 0.45],
-                "Back": [0.36, 0.00, 0.66, -0.56]
-            };
-            const In_values = ctrlPt_In[type];
-            if (dir == "In") {
-                // Inならそのまま返す
-                return In_values;
-            } else if (dir == "Out") {
-                // Inを[x1, y1, x2, y2]とすると、Outは[1-x2, 1-y2, 1-x1, 1-y1]で計算できる
-                return [
-                    1 - In_values[2],
-                    1 - In_values[3],
-                    1 - In_values[0],
-                    1 - In_values[1],
-                ];
-            }
-        } else if (dir == "InOut" || dir == "OutIn") {
-            /** @type {Object<string, [number, number, number, number]>} - 各typeの"InOut"の場合の制御点の値 */
-            const ctrlPt_InOut = {
-                "Linear": [0.00, 0.00, 1.00, 1.00],
-                "Sine": [0.37, 0.00, 0.63, 1.00],
-                "Quad": [0.45, 0.00, 0.55, 1.00],
-                "Cubic": [0.65, 0.00, 0.35, 1.00],
-                "Quart": [0.76, 0.00, 0.24, 1.00],
-                "Quint": [0.83, 0.00, 0.17, 1.00],
-                "Expo": [0.87, 0.00, 0.13, 1.00],
-                "Circ": [0.85, 0.00, 0.15, 1.00],
-                "Back": [0.68, -0.60, 0.32, 1.60]
-            };
-            const InOut_values = ctrlPt_InOut[type];
-            if (dir == "InOut") {
-                // InOutならそのまま返す
-                return InOut_values;
-            } else if (dir == "OutIn") {
-                // InOutを[x1, y1, x2, y2]とすると、OutInは[y1, x1, y2, x2]で計算できる
-                return [
-                    InOut_values[1],
-                    InOut_values[0],
-                    InOut_values[3],
-                    InOut_values[2],
-                ];
-            }
-        }
-        // どれにも当てはまらない場合はnullを返す
-        return null;
     }
     /** @type {(a: Zahlen_Qi, b: Zahlen_Qi, c: Zahlen_Qi, d: Zahlen_Qi) => Zahlen_Qi[]} - 3次方程式 ax³+bx²+cx+d=0 の解を返します(カルダノの公式) */
     static #cardano(a, b, c, d) {
@@ -153,23 +88,88 @@ const Easing = class Easing {
     /** @type {() => string[]} - 利用可能なイージング関数の一覧を返す */
     static getList() {
         const list = [];
-        for (const type of this.#validFunctions.types) {
-            for (const dir of this.#validFunctions.dirs) {
+        for (const type of this.validFunctions.types) {
+            for (const dir of this.validFunctions.dirs) {
                 list.push(this.#getFnName(type, dir));
             }
         }
         return list;
     }
+    /** @type {(name: string) => [number, number, number, number]} - 指定された関数の3次ベジェ曲線の制御点の座標を取得([x1, y1, x2, y2]) */
+    static getCtrlPoints(name) {
+        const { type, dir } = this.#getTypeDir(name);
+        /** @description - dirによって分岐 */
+        if (dir == "In" || dir == "Out") {
+            /** @type {Object<string, [number, number, number, number]>} - 各typeの"In"の場合の制御点の値 */
+            const ctrlPt_In = {
+                "Linear": [0.00, 0.00, 1.00, 1.00],
+                "Sine": [0.12, 0.00, 0.39, 0.00],
+                "Quad": [0.11, 0.00, 0.50, 0.00],
+                "Cubic": [0.32, 0.00, 0.67, 0.00],
+                "Quart": [0.50, 0.00, 0.75, 0.00],
+                "Quint": [0.64, 0.00, 0.78, 0.00],
+                "Expo": [0.70, 0.00, 0.84, 0.00],
+                "Circ": [0.55, 0.00, 1.00, 0.45],
+                "Back": [0.36, 0.00, 0.66, -0.56]
+            };
+            const In_values = ctrlPt_In[type];
+            if (dir == "In") {
+                // Inならそのまま返す
+                return In_values;
+            } else if (dir == "Out") {
+                // Inを[x1, y1, x2, y2]とすると、Outは[1-x2, 1-y2, 1-x1, 1-y1]で計算できる
+                return [
+                    1 - In_values[2],
+                    1 - In_values[3],
+                    1 - In_values[0],
+                    1 - In_values[1],
+                ];
+            }
+        } else if (dir == "InOut" || dir == "OutIn") {
+            /** @type {Object<string, [number, number, number, number]>} - 各typeの"InOut"の場合の制御点の値 */
+            const ctrlPt_InOut = {
+                "Linear": [0.00, 0.00, 1.00, 1.00],
+                "Sine": [0.37, 0.00, 0.63, 1.00],
+                "Quad": [0.45, 0.00, 0.55, 1.00],
+                "Cubic": [0.65, 0.00, 0.35, 1.00],
+                "Quart": [0.76, 0.00, 0.24, 1.00],
+                "Quint": [0.83, 0.00, 0.17, 1.00],
+                "Expo": [0.87, 0.00, 0.13, 1.00],
+                "Circ": [0.85, 0.00, 0.15, 1.00],
+                "Back": [0.68, -0.60, 0.32, 1.60]
+            };
+            const InOut_values = ctrlPt_InOut[type];
+            if (dir == "InOut") {
+                // InOutならそのまま返す
+                return InOut_values;
+            } else if (dir == "OutIn") {
+                // InOutを[x1, y1, x2, y2]とすると、OutInは[y1, x1, y2, x2]で計算できる
+                return [
+                    InOut_values[1],
+                    InOut_values[0],
+                    InOut_values[3],
+                    InOut_values[2],
+                ];
+            }
+        }
+        // どれにも当てはまらない場合はnullを返す
+        return null;
+    }
+    /** @type {{types: string[], dirs: string[]}} - 有効なイージング関数の種類と方向 */
+    static validFunctions = {
+        "types": ["Linear", "Sine", "Quad", "Cubic", "Quart", "Quint", "Expo", "Circ", "Back"],
+        "dirs": ["In", "Out", "InOut", "OutIn"],
+    }
     /** @type {(fn: string, x: number) => number[]} - 指定された関数で、0〜1の値をイージングした値の候補を返す */
     static convert(fn, x) {
-        const ctrlPts = this.#getCtrlPoints(fn);
+        const ctrlPts = this.getCtrlPoints(fn);
         const t_nominee = this.#bezier_p2t(x, ctrlPts[0], ctrlPts[2]);
         const y_nominee = t_nominee.map(t => this.#bezier_t2p(t, ctrlPts[1], ctrlPts[3]));
         return y_nominee;
     }
     /** @type {(fn: string, y: number) => number[]} - yが「指定された関数で0〜1の値をイージングした値」だと仮定して、イージング前のxの値の候補を返す */
     static invert(fn, y) {
-        const ctrlPts = this.#getCtrlPoints(fn);
+        const ctrlPts = this.getCtrlPoints(fn);
         const t_nominee = this.#bezier_p2t(y, ctrlPts[1], ctrlPts[3]);
         const x_nominee = t_nominee.map(t => this.#bezier_t2p(t, ctrlPts[0], ctrlPts[2]));
         return x_nominee;
