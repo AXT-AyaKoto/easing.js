@@ -11,24 +11,12 @@ const Easing = class Easing {
     }
     /** @type {(str: string) => {type: string, dir: string}} - イージング関数名からイージングの種類と方向を取得 */
     static #getTypeDir(str) {
-        // 有効かどうか確認する
-        if (!this.#isValidFn(str)) {
-            return null;
-        }
-        // 大丈夫そうなら返す
         const [type, dir] = str.split("_");
         return { type, dir };
     }
     /** @type {(type: string, dir: string) => string} - イージングの種類と方向からイージング関数名を取得 */
     static #getFnName(type, dir) {
-        // 一旦結合する
-        const name = `${type}_${dir}`;
-        // 有効かどうか確認する
-        if (!this.#isValidFn(name)) {
-            return null;
-        }
-        // 有効なら返す
-        return name;
+        return `${type}_${dir}`;
     }
     /** @type {(a: Zahlen_Qi, b: Zahlen_Qi, c: Zahlen_Qi, d: Zahlen_Qi) => Zahlen_Qi[]} - 3次方程式 ax³+bx²+cx+d=0 の解を返します(カルダノの公式) */
     static #cardano(a, b, c, d) {

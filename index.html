@@ -25,30 +25,45 @@
     </section>
     <section>
         <h2>Graph Output</h2>
-        <canvas width="1000" height="1000"></canvas>
+        <canvas width="1000" height="1000" style="background-color: black; aspect-ratio: 1; max-height: 50vh;"></canvas>
     </section>
-    <script>
+    <script type="module">
+        import "./script.js";
         // select要素のoptionを生成
-        const validFunctions = {
-            "types": ["Linear", "Sine", "Quad", "Cubic", "Quart", "Quint", "Expo", "Circ", "Back"],
-            "dirs": ["In", "Out", "InOut", "OutIn"],
-        };
         const selectType = document.getElementById("select-type");
-        for (const type of validFunctions.types) {
+        for (const type of Easing.validFunctions.types) {
             const option = document.createElement("option");
             option.value = type;
             option.textContent = type;
             selectType.appendChild(option);
         }
         const selectDir = document.getElementById("select-dir");
-        for (const dir of validFunctions.dirs) {
+        for (const dir of Easing.validFunctions.dirs) {
             const option = document.createElement("option");
             option.value = dir;
             option.textContent = dir;
             selectDir.appendChild(option);
         }
+        // canvasの座標軸をずらしておく (デカルト座標系、右上の端を(1,1)に)
+        const canvas = document.querySelector("canvas");
+        const ctx = canvas.getContext("2d");
+        ctx.translate(0, canvas.height);
+        ctx.scale(1 / 1000, -1 / 1000);
         // グラフ描画関数
-        const drawGraph = 
+        const drawGraph = () => {
+            const ctrlPts = Easing.getCtrlPoints(`${selectType.value}_${selectDir.value}`);
+            ctx.clearRect(0, 0, 1, 1);
+            // 白 : ネイティブ実装のベジェ曲線描画をそのまま使う
+            ctx.strokeStyle = "white";
+            ctx.lineWidth = 0.01;
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.bezierCurveTo(ctrlPts[0].x, ctrlPts[0].y, ctrlPts[1].x, ctrlPts[1].y, 1, 1);
+            ctx.stroke();
+        };
+        // イベントリスナー
+        selectType.addEventListener("change", drawGraph);
+        selectDir.addEventListener("change", drawGraph);
     </script>
 </body>
 
