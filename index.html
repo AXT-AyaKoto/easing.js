@@ -48,19 +48,21 @@
         const canvas = document.querySelector("canvas");
         const ctx = canvas.getContext("2d");
         ctx.translate(0, canvas.height);
-        ctx.scale(1 / 1000, -1 / 1000);
+        ctx.scale(1, -1);
         // グラフ描画関数
         const drawGraph = () => {
             const ctrlPts = Easing.getCtrlPoints(`${selectType.value}_${selectDir.value}`);
-            ctx.clearRect(0, 0, 1, 1);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             // 白 : ネイティブ実装のベジェ曲線描画をそのまま使う
             ctx.strokeStyle = "white";
-            ctx.lineWidth = 0.01;
+            ctx.lineWidth = 10;
             ctx.beginPath();
             ctx.moveTo(0, 0);
-            ctx.bezierCurveTo(ctrlPts[0].x, ctrlPts[0].y, ctrlPts[1].x, ctrlPts[1].y, 1, 1);
+            ctx.bezierCurveTo(ctrlPts[0] * canvas.width, ctrlPts[1] * canvas.height, ctrlPts[2] * canvas.width, ctrlPts[3] * canvas.height, canvas.width, canvas.height);
             ctx.stroke();
+            console.log(ctrlPts);
         };
+        drawGraph();
         // イベントリスナー
         selectType.addEventListener("change", drawGraph);
         selectDir.addEventListener("change", drawGraph);
