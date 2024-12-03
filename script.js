@@ -1,7 +1,4 @@
-/*
 import "https://cdn.jsdelivr.net/gh/AXT-AyaKoto/Zahlen.js@v0.7/script.js";
-const Zahlen = globalThis.Zahlen;
-*/
 
 /** @description - AXT-AyaKoto/easing.js 各機能 (プライベートプロパティを使いたいのでClassにします) */
 const Easing = class Easing {
