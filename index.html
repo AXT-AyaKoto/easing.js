@@ -25,7 +25,8 @@
     </section>
     <section>
         <h2>Graph Output</h2>
-        <canvas width="1000" height="1000" style="background-color: black; aspect-ratio: 1; max-height: 50vh;"></canvas>
+        <canvas width="2000" height="2000"
+            style="background-color: black; aspect-ratio: 1; max-height: 50vh; box-shadow: 0 2px 6px black;"></canvas>
     </section>
     <script type="module">
         import "./script.js";
@@ -45,22 +46,46 @@
             selectDir.appendChild(option);
         }
         // canvasの座標軸をずらしておく (デカルト座標系、右上の端を(1,1)に)
+        const basis_size = 1000;
         const canvas = document.querySelector("canvas");
         const ctx = canvas.getContext("2d");
         ctx.translate(0, canvas.height);
         ctx.scale(1, -1);
         // グラフ描画関数
         const drawGraph = () => {
-            const ctrlPts = Easing.getCtrlPoints(`${selectType.value}_${selectDir.value}`);
+            const fnName = `${selectType.value}_${selectDir.value}`;
+            const ctrlPts = Easing.getCtrlPoints(fnName);
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // 灰 : 座標軸など
+            ctx.strokeStyle = "#444";
+            ctx.lineWidth = 3;
+            for (let i = 0; i <= 2000; i += 100) {
+                ctx.stroke(new Path2D(`M0 ${i} H2000`));
+                ctx.stroke(new Path2D(`M${i} 0 V2000`));
+            }
+            ctx.strokeStyle = "#888";
+            ctx.lineWidth = 6;
+            ctx.stroke(new Path2D("M0 500 H2000"));
+            ctx.stroke(new Path2D("M0 1500 H2000"));
+            ctx.stroke(new Path2D("M500 0 V2000"));
+            ctx.stroke(new Path2D("M1500 0 V2000"));
             // 白 : ネイティブ実装のベジェ曲線描画をそのまま使う
             ctx.strokeStyle = "white";
             ctx.lineWidth = 10;
             ctx.beginPath();
-            ctx.moveTo(0, 0);
-            ctx.bezierCurveTo(ctrlPts[0] * canvas.width, ctrlPts[1] * canvas.height, ctrlPts[2] * canvas.width, ctrlPts[3] * canvas.height, canvas.width, canvas.height);
+            ctx.moveTo(basis_size / 2, basis_size / 2);
+            ctx.bezierCurveTo(...[ctrlPts[0], ctrlPts[1], ctrlPts[2], ctrlPts[3], 1, 1].map(n => n * basis_size + basis_size / 2));
             ctx.stroke();
             console.log(ctrlPts);
+            // 赤 : xを0.1ずつ増やしながらyを求めて点を打つ
+            /*
+            ctx.strokeStyle = "red";
+            for (let x = 0.1; x <= 1; x += 0.1) {
+                const converted = Easing.convert(fnName, x);
+                console.log(x, converted);
+                ctx.arc(converted[0] * basis_size + basis_size / 2, converted[1] * basis_size + basis_size / 2, 5, 0, 2 * Math.PI);
+            }
+            */
         };
         drawGraph();
         // イベントリスナー
