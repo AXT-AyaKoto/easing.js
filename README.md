@@ -5,11 +5,10 @@
 ## Installation
 
 - 拙作の[Zahlen.js](https://github.com/AXT-AyaKoto/Zahlen.js)が必要です。
-- `script.js`を何らかの方法で読み込んでください
+- `script.js`をモジュールとして何らかの方法で読み込んでください
     - CDN : `https://cdn.jsdelivr.net/gh/AXT-AyaKoto/easing.js/script.js`
         - バージョン指定 : `https://cdn.jsdelivr.net/gh/AXT-AyaKoto/easing.js@vX.Y.Z/script.js` 
-        - HTMLの場合 : `<script src="https://cdn.jsdelivr.net/gh/AXT-AyaKoto/easing.js/script.js"></script>`
-        - ES Moduleの場合 : `import "https://cdn.jsdelivr.net/gh/AXT-AyaKoto/easing.js/script.js";`
+        - `import "https://cdn.jsdelivr.net/gh/AXT-AyaKoto/easing.js/script.js";`
 
 ## Usage
 

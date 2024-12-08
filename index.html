@@ -77,15 +77,24 @@
             ctx.bezierCurveTo(...[ctrlPts[0], ctrlPts[1], ctrlPts[2], ctrlPts[3], 1, 1].map(n => n * basis_size + basis_size / 2));
             ctx.stroke();
             console.log(ctrlPts);
-            // 赤 : xを0.1ずつ増やしながらyを求めて点を打つ
-            /*
-            ctx.strokeStyle = "red";
-            for (let x = 0.1; x <= 1; x += 0.1) {
+            // 赤 : xを0.02ずつ増やしながらyを求めて点を打つ
+            ctx.fillStyle = "#f88";
+            for (let x = -0.5; x <= 1.5; x += 0.02) {
                 const converted = Easing.convert(fnName, x);
-                console.log(x, converted);
-                ctx.arc(converted[0] * basis_size + basis_size / 2, converted[1] * basis_size + basis_size / 2, 5, 0, 2 * Math.PI);
+                converted.forEach(y => {
+                    console.log(x, y);
+                    ctx.fillRect(x * basis_size + basis_size / 2, y * basis_size + basis_size / 2, 10, 10);
+                });
             }
-            */
+            // 青 : yを0.02ずつ増やしながらxを求めて点を打つ
+            ctx.fillStyle = "#88f";
+            for (let y = -0.5; y <= 1.5; y += 0.02) {
+                const converted = Easing.invert(fnName, y);
+                converted.forEach(x => {
+                    console.log(x, y);
+                    ctx.fillRect(x * basis_size + basis_size / 2, y * basis_size + basis_size / 2, 10, 10);
+                });
+            }
         };
         drawGraph();
         // イベントリスナー

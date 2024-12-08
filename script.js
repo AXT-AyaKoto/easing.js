@@ -1,14 +1,8 @@
-import "https://cdn.jsdelivr.net/gh/AXT-AyaKoto/Zahlen.js@v0.7/script.js";
+import "https://cdn.jsdelivr.net/gh/AXT-AyaKoto/Zahlen.js@v0.7.3/script.js";
 
 /** @description - AXT-AyaKoto/easing.js 各機能 (プライベートプロパティを使いたいのでClassにします) */
 const Easing = class Easing {
     /* ======== Private Props ======== */
-    /** @type {(str: string) => boolean} - イージング関数名が有効なものかチェック */
-    static #isValidFn(str) {
-        // typesとdirsの組み合わせがあるかどうかチェックして返す
-        const { type, dir } = this.#getTypeDir(str);
-        return this.validFunctions.types.includes(type) && this.validFunctions.dirs.includes(dir);
-    }
     /** @type {(str: string) => {type: string, dir: string}} - イージング関数名からイージングの種類と方向を取得 */
     static #getTypeDir(str) {
         const [type, dir] = str.split("_");
@@ -20,32 +14,20 @@ const Easing = class Easing {
     }
     /** @type {(a: Zahlen_Qi, b: Zahlen_Qi, c: Zahlen_Qi, d: Zahlen_Qi) => Zahlen_Qi[]} - 3次方程式 ax³+bx²+cx+d=0 の解を返します(カルダノの公式) */
     static #cardano(a, b, c, d) {
-        /* ==== 中間変数 ==== */
-        // A = -(b/3a)
-        const A = Zahlen.new(-1).mul(b.div(a.mul(Zahlen.new(3))));
-        // ω₊ = -1/2 + √3i
-        const omega_plus = Zahlen.new(-0.5).add(Zahlen.Math.sqrt(Zahlen.new(3)).mul(Zahlen.Math.I));
-        // ω₋ = -1/2 - √3i
-        const omega_minus = Zahlen.new(-0.5).sub(Zahlen.Math.sqrt(Zahlen.new(3)).mul(Zahlen.Math.I));
-        // B = -2b³ + 9ab - 27a²d
-        const B = Zahlen.new(-2).mul(b.pow(Zahlen.new(3))).add(Zahlen.new(9).mul(a).mul(b)).sub(Zahlen.new(27).mul(a.pow(Zahlen.new(2))).mul(d));
-        // C = 3×( 27a²b² - 18abcd + 4b³d + 4ac³ + b²c² )
-        const C = Zahlen.new(3).mul(
-            Zahlen.new(27).mul(a.pow(Zahlen.new(2))).mul(b.pow(Zahlen.new(2)))
-                .sub(Zahlen.new(18).mul(a).mul(b).mul(c).mul(d))
-                .add(Zahlen.new(4).mul(b.pow(Zahlen.new(3))).mul(d))
-                .add(Zahlen.new(4).mul(a).mul(c.pow(Zahlen.new(3))))
-                .add(Zahlen.new(4).mul(b.pow(Zahlen.new(2))).mul(c.pow(Zahlen.new(2))))
-        )
-        // R₊ = ³√( ( B / 54a³ ) + ( √c / 18a² ) )
-        const R_plus = Zahlen.Math.cbrt(B.div(Zahlen.new(54).mul(a.pow(Zahlen.new(2)))).add(Zahlen.Math.sqrt(c).div(Zahlen.new(18).mul(a.pow(Zahlen.new(2))))));
-        // R₋ = ³√( ( B / 54a³ ) - ( √c / 18a² ) )
-        const R_minus = Zahlen.Math.cbrt(B.div(Zahlen.new(54).mul(a.pow(Zahlen.new(2)))).sub(Zahlen.Math.sqrt(c).div(Zahlen.new(18).mul(a.pow(Zahlen.new(2))))));
-        // x₁ = A + R₊ + R₋ , x₂ = A + ω₊R₊ + ω₋R₋ , x₃ = A + ω₋R₊ + ω₊R₋
-        const x1 = A.add(R_plus).add(R_minus);
-        const x2 = A.add(omega_plus.mul(R_plus)).add(omega_minus.mul(R_minus));
-        const x3 = A.add(omega_minus.mul(R_plus)).add(omega_plus.mul(R_minus));
-        // 返す
+        const Z = (n) => Zahlen.new(n);
+        // a = 0ならエラー
+        if (a.eq(Z(0))) throw new Error("a must be non-zero");
+        // 係数の正規化
+        const [b_, c_, d_] = [b, c, d].map(n => n.div(a));
+        // p, q, u, v
+        const p = Z(3).mul(c).sub(b.pow(Z(2))).div(Z(3));
+        const q = Z(2).mul(b.pow(Z(3))).sub(Z(9).mul(b).mul(c)).add(Z(27).mul(d)).div(Z(27));
+        const u = Zahlen.Math.cbrt(Z(-1).mul(q).div(Z(2)).add(Zahlen.Math.sqrt(q.div(Z(2)).pow(Z(2)).add(p.div(Z(3)).pow(Z(3))))));
+        const v = Zahlen.Math.cbrt(Z(-1).mul(q).div(Z(2)).sub(Zahlen.Math.sqrt(q.div(Z(2)).pow(Z(2)).add(p.div(Z(3)).pow(Z(3))))));
+        // x1, x2, x3
+        const x1 = u.add(v).sub(b.div(Z(3)));
+        const x2 = Z(-1).mul(u.add(v)).div(Z(2)).sub(b.div(Z(3))).add(Zahlen.Math.sqrt(Z(3)).mul(u.sub(v)).div(Z(2)).mul(Zahlen.Math.I));
+        const x3 = Z(-1).mul(u.add(v)).div(Z(2)).sub(b.div(Z(3))).sub(Zahlen.Math.sqrt(Z(3)).mul(u.sub(v)).div(Z(2)).mul(Zahlen.Math.I));
         return [x1, x2, x3];
     }
     /** @type {(T: number, A: number, B: number) => number} - 3次ベジェ曲線の「時間tから座標pへの変換式」を計算した値を求めます */
