@@ -5,7 +5,87 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>easing.js test</title>
-    <script type="module" src="./script.js"></script>
+    <script type="module">
+        import { Easing } from "./script.js";
+        // ロード完了待ちすいせい
+        await Promise.race([
+            new Promise((resolve) => { window.addEventListener("load", resolve, { once: true }); }),
+            new Promise((resolve) => {
+                const check = () => { if (document.readyState === "complete") { resolve(); } else { setTimeout(check, 1000); } };
+                check();
+            }),
+        ]);
+        // select要素のoptionを生成
+        const selectName = document.getElementById("select-name");
+        for (const name of Easing.named_list) {
+            const option = document.createElement("option");
+            option.value = name;
+            option.textContent = name;
+            selectName.appendChild(option);
+        }
+        // canvas要素の取得と座標軸変形
+        const canvas = document.querySelector("canvas");
+        const ctx = canvas.getContext("2d");
+        ctx.translate(canvas.width / 4, canvas.height / 4 * 3);
+        ctx.scale(canvas.width / 2, -canvas.height / 2);
+        /** @type {(ctrlPts: [number, number, number, number]) => void} - グラフ描画(画面更新)をする関数 */
+        const redraw = (ctrlPts) => {
+            // 今描かれているものを消す
+            ctx.clearRect(-0.5, -0.5, 2, 2);
+            // 黒 : 背景
+            ctx.fillStyle = "#000";
+            ctx.fillRect(-0.5, -0.5, 2, 2);
+            // 濃灰 : グリッド xとyがそれぞれ0.1ごと、0と1は太めに
+            ctx.strokeStyle = "#444";
+            for (let i = -5; i <= 15; i++) {
+                const p = i / 10;
+                ctx.lineWidth = ([0, 10].includes(i) ? 8 : 2) / 1000;
+                ctx.stroke(new Path2D(`M${p.toFixed(1)} -0.5 V1.5 Z`));
+                ctx.stroke(new Path2D(`M-0.5 ${p.toFixed(1)} H1.5 Z`));
+            }
+            // 薄灰 : 0までと1からの線
+            ctx.strokeStyle = "#aaa";
+            ctx.lineWidth = 10 / 1000;
+            ctx.stroke(new Path2D(`M-0.5 0 H0 Z`));
+            ctx.stroke(new Path2D(`M1 1 H1.5 Z`));
+            // 白 : SVG Path 3次ベジェ曲線コマンドで描画
+            ctx.strokeStyle = "#fff";
+            ctx.stroke(new Path2D(`M0 0 C ${ctrlPts.join(" ")} 1 1`));
+            // 赤 : x=-0.5からx=1.5まで0.01ごとに、yの値を計算して点を描画
+            ctx.fillStyle = "#f44";
+            console.groupCollapsed(`[${ctrlPts.map(x => x.toFixed(2)).join(", ")}] x => y`);
+            for (let i = 0; i <= 100; i++) {
+                const x = i / 100;
+                const ys = Easing.convert(x, ctrlPts);
+                ys.forEach(y => {
+                    ctx.beginPath();
+                    ctx.arc(x, y, 7 / 1000, 0, 2 * Math.PI);
+                    ctx.fill();
+                });
+                console.log(`x = ${x.toFixed(2)} => y = [${ys.map(y => y.toFixed(2)).join(", ")}]`);
+            }
+            console.groupEnd("x");
+            console.groupCollapsed(`[${ctrlPts.map(x => x.toFixed(2)).join(", ")}] y => x`);
+            // 青 : y=-0からy=1まで0.01ごとに、xの値を計算して点を描画
+            ctx.fillStyle = "#44f";
+            for (let i = 0; i <= 100; i++) {
+                const y = i / 100;
+                const xs = Easing.invert(y, ctrlPts, true);
+                xs.forEach(x => {
+                    ctx.beginPath();
+                    ctx.arc(x, y, 7 / 1000, 0, 2 * Math.PI);
+                    ctx.fill();
+                });
+                console.log(`y = ${y.toFixed(2)} => x = [${xs.map(x => x.toFixed(2)).join(", ")}]`);
+            }
+            console.groupEnd("y");
+        };
+        redraw(Easing.getCtrlPts(selectName.value));
+        // select要素のchangeイベントでグラフ描画
+        selectName.addEventListener("change", () => {
+            redraw(Easing.getCtrlPts(selectName.value));
+        });
+    </script>
 </head>
 
 <body>
@@ -14,12 +94,8 @@
         <h2>Easing Settings</h2>
         <ul>
             <li>
-                <label for="select-type">type</label>
-                <select id="select-type"></select>
-            </li>
-            <li>
-                <label for="select-dir">dir</label>
-                <select id="select-dir"></select>
+                <label for="select-name">Name</label>
+                <select id="select-name"></select>
             </li>
         </ul>
     </section>
@@ -28,79 +104,6 @@
         <canvas width="2000" height="2000"
             style="background-color: black; aspect-ratio: 1; max-height: 50vh; box-shadow: 0 2px 6px black;"></canvas>
     </section>
-    <script type="module">
-        import "./script.js";
-        // select要素のoptionを生成
-        const selectType = document.getElementById("select-type");
-        for (const type of Easing.validFunctions.types) {
-            const option = document.createElement("option");
-            option.value = type;
-            option.textContent = type;
-            selectType.appendChild(option);
-        }
-        const selectDir = document.getElementById("select-dir");
-        for (const dir of Easing.validFunctions.dirs) {
-            const option = document.createElement("option");
-            option.value = dir;
-            option.textContent = dir;
-            selectDir.appendChild(option);
-        }
-        // canvasの座標軸をずらしておく (デカルト座標系、右上の端を(1,1)に)
-        const basis_size = 1000;
-        const canvas = document.querySelector("canvas");
-        const ctx = canvas.getContext("2d");
-        ctx.translate(0, canvas.height);
-        ctx.scale(1, -1);
-        // グラフ描画関数
-        const drawGraph = () => {
-            const fnName = `${selectType.value}_${selectDir.value}`;
-            const ctrlPts = Easing.getCtrlPoints(fnName);
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            // 灰 : 座標軸など
-            ctx.strokeStyle = "#444";
-            ctx.lineWidth = 3;
-            for (let i = 0; i <= 2000; i += 100) {
-                ctx.stroke(new Path2D(`M0 ${i} H2000`));
-                ctx.stroke(new Path2D(`M${i} 0 V2000`));
-            }
-            ctx.strokeStyle = "#888";
-            ctx.lineWidth = 6;
-            ctx.stroke(new Path2D("M0 500 H2000"));
-            ctx.stroke(new Path2D("M0 1500 H2000"));
-            ctx.stroke(new Path2D("M500 0 V2000"));
-            ctx.stroke(new Path2D("M1500 0 V2000"));
-            // 白 : ネイティブ実装のベジェ曲線描画をそのまま使う
-            ctx.strokeStyle = "white";
-            ctx.lineWidth = 10;
-            ctx.beginPath();
-            ctx.moveTo(basis_size / 2, basis_size / 2);
-            ctx.bezierCurveTo(...[ctrlPts[0], ctrlPts[1], ctrlPts[2], ctrlPts[3], 1, 1].map(n => n * basis_size + basis_size / 2));
-            ctx.stroke();
-            console.log(ctrlPts);
-            // 赤 : xを0.02ずつ増やしながらyを求めて点を打つ
-            ctx.fillStyle = "#f88";
-            for (let x = -0.5; x <= 1.5; x += 0.02) {
-                const converted = Easing.convert(fnName, x);
-                converted.forEach(y => {
-                    console.log(x, y);
-                    ctx.fillRect(x * basis_size + basis_size / 2, y * basis_size + basis_size / 2, 10, 10);
-                });
-            }
-            // 青 : yを0.02ずつ増やしながらxを求めて点を打つ
-            ctx.fillStyle = "#88f";
-            for (let y = -0.5; y <= 1.5; y += 0.02) {
-                const converted = Easing.invert(fnName, y);
-                converted.forEach(x => {
-                    console.log(x, y);
-                    ctx.fillRect(x * basis_size + basis_size / 2, y * basis_size + basis_size / 2, 10, 10);
-                });
-            }
-        };
-        drawGraph();
-        // イベントリスナー
-        selectType.addEventListener("change", drawGraph);
-        selectDir.addEventListener("change", drawGraph);
-    </script>
 </body>
 
 </html>
