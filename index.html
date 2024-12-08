@@ -70,7 +70,7 @@
             ctx.fillStyle = "#44f";
             for (let i = 0; i <= 100; i++) {
                 const y = i / 100;
-                const xs = Easing.invert(y, ctrlPts, true);
+                const xs = Easing.invert(y, ctrlPts);
                 xs.forEach(x => {
                     ctx.beginPath();
                     ctx.arc(x, y, 7 / 1000, 0, 2 * Math.PI);

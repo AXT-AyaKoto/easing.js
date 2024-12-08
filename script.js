@@ -86,6 +86,11 @@ const Complex = class Complex {
         // 0^y の場合は 0 で早期return
         if (a === 0 && b === 0) return new Complex(0, 0);
 
+        // 虚部が両方0 かつ 実部が両方正 ならMath.pow()で計算
+        if (b === 0 && d === 0 && a > 0 && c > 0) {
+            return new Complex(Math.pow(a, c), 0);
+        }
+
         // 極形式への変換
         const r = Math.sqrt(a * a + b * b);
         const theta = Math.atan2(b, a);
@@ -175,9 +180,8 @@ const cardano = (a, b, c, d) => {
     const x2 = Complex.add(Complex.sub(minus_u_plus_v_over_2, b_over_3), Complex.mul(Complex.mul(sqrt_3, u_minus_v_over_2), I));
     // x3
     const x3 = Complex.sub(Complex.sub(minus_u_plus_v_over_2, b_over_3), Complex.mul(Complex.mul(sqrt_3, u_minus_v_over_2), I));
-    console.log(x1, x2, x3);
     // return
-    return [x1, x2, x3].map(n => Complex.round(n, 2));
+    return [x1, x2, x3].map(n => Complex.round(n, 4));
 };
 
 /** ================================================================================================
