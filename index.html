@@ -52,56 +52,70 @@
             ctx.stroke(new Path2D(`M-0.5 0 H0 Z`));
             ctx.stroke(new Path2D(`M1 1 H1.5 Z`));
             // 白 : SVG Path 3次ベジェ曲線コマンドで描画
-            ctx.strokeStyle = "#fff";
-            ctx.stroke(new Path2D(`M0 0 C ${ctrlPts.join(" ")} 1 1`));
+            if (document.getElementById("input-W").checked) {
+                ctx.strokeStyle = "#fff";
+                ctx.stroke(new Path2D(`M0 0 C ${ctrlPts.join(" ")} 1 1`));
+            }
             // 赤 : x=-0.5からx=1.5まで0.01ごとに、yの値を計算して点を描画
-            ctx.fillStyle = "#f22";
-            console.groupCollapsed(`[${ctrlPts.map(x => x.toFixed(2)).join(", ")}] x => y`);
-            for (let i = 0; i <= 100; i++) {
-                const x = i / 100;
-                const ys = Easing.convert(x, ctrlPts);
-                ys.forEach(y => {
-                    ctx.beginPath();
-                    ctx.arc(x, y, 7 / 1000, 0, 2 * Math.PI);
-                    ctx.fill();
-                });
-                console.log(`x = ${x.toFixed(2)} => y = [${ys.map(y => y.toFixed(2)).join(", ")}]`);
-            }
-            console.groupEnd("x");
-            console.groupCollapsed(`[${ctrlPts.map(x => x.toFixed(2)).join(", ")}] y => x`);
-            // 緑 : y=-0からy=1まで0.01ごとに、xの値を計算して点を描画
-            ctx.fillStyle = "#2f2";
-            for (let i = 0; i <= 100; i++) {
-                const y = i / 100;
-                const xs = Easing.invert(y, ctrlPts);
-                xs.forEach(x => {
-                    ctx.beginPath();
-                    ctx.arc(x, y, 7 / 1000, 0, 2 * Math.PI);
-                    ctx.fill();
-                });
-                console.log(`y = ${y.toFixed(2)} => x = [${xs.map(x => x.toFixed(2)).join(", ")}]`);
-            }
-            console.groupEnd("y");
-            // 青 : t=0からt=1まで0.01ごとに、xとyの値を計算して線を描画
-            ctx.strokeStyle = "#22f";
-            ctx.lineWidth = 8 / 1000;
-            for (let i = 0; i <= 100; i++) {
-                const t = i / 100;
-                const x = Easing.cubicBezier_t2p(t, ctrlPts[0], ctrlPts[2]);
-                const y = Easing.cubicBezier_t2p(t, ctrlPts[1], ctrlPts[3]);
-                if (i === 0) {
-                    ctx.beginPath();
-                    ctx.moveTo(x, y);
-                } else {
-                    ctx.lineTo(x, y);
+            if (document.getElementById("input-R").checked) {
+                ctx.fillStyle = "#f22";
+                console.groupCollapsed(`[${ctrlPts.map(x => x.toFixed(2)).join(", ")}] x => y`);
+                for (let i = 0; i <= 100; i++) {
+                    const x = i / 100;
+                    const ys = Easing.convert(x, ctrlPts);
+                    ys.forEach(y => {
+                        ctx.beginPath();
+                        ctx.arc(x, y, 7 / 1000, 0, 2 * Math.PI);
+                        ctx.fill();
+                    });
+                    console.log(`x = ${x.toFixed(2)} => y = [${ys.map(y => y.toFixed(2)).join(", ")}]`);
                 }
+                console.groupEnd("x");
             }
-            ctx.stroke();
+            // 緑 : y=-0からy=1まで0.01ごとに、xの値を計算して点を描画
+            if (document.getElementById("input-G").checked) {
+                ctx.fillStyle = "#2f2";
+                console.groupCollapsed(`[${ctrlPts.map(x => x.toFixed(2)).join(", ")}] y => x`);
+                for (let i = 0; i <= 100; i++) {
+                    const y = i / 100;
+                    const xs = Easing.invert(y, ctrlPts);
+                    xs.forEach(x => {
+                        ctx.beginPath();
+                        ctx.arc(x, y, 7 / 1000, 0, 2 * Math.PI);
+                        ctx.fill();
+                    });
+                    console.log(`y = ${y.toFixed(2)} => x = [${xs.map(x => x.toFixed(2)).join(", ")}]`);
+                }
+                console.groupEnd("y");
+            }
+            // 青 : t=0からt=1まで0.01ごとに、xとyの値を計算して線を描画
+            if (document.getElementById("input-B").checked) {
+                ctx.strokeStyle = "#22f";
+                ctx.lineWidth = 8 / 1000;
+                for (let i = 0; i <= 100; i++) {
+                    const t = i / 100;
+                    const x = Easing.cubicBezier_t2p(t, ctrlPts[0], ctrlPts[2]);
+                    const y = Easing.cubicBezier_t2p(t, ctrlPts[1], ctrlPts[3]);
+                    if (i === 0) {
+                        ctx.beginPath();
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                }
+                ctx.stroke();
+            }
         };
         redraw(Easing.getCtrlPts(selectName.value));
         // select要素のchangeイベントでグラフ描画
         selectName.addEventListener("change", () => {
             redraw(Easing.getCtrlPts(selectName.value));
+        });
+        // input要素のchangeイベントでグラフ描画
+        document.querySelectorAll("input").forEach(input => {
+            input.addEventListener("change", () => {
+                redraw(Easing.getCtrlPts(selectName.value));
+            });
         });
     </script>
 </head>
@@ -114,6 +128,22 @@
             <li>
                 <label for="select-name">Name</label>
                 <select id="select-name"></select>
+            </li>
+            <li>
+                <label for="input-W">SVG Path (白)</label>
+                <input type="checkbox" id="input-W">
+            </li>
+            <li>
+                <label for="input-R">x → t → y (赤)</label>
+                <input type="checkbox" id="input-R">
+            </li>
+            <li>
+                <label for="input-G">y → t → x (緑)</label>
+                <input type="checkbox" id="input-G">
+            </li>
+            <li>
+                <label for="input-B">t → x, y (青)</label>
+                <input type="checkbox" id="input-B">
             </li>
         </ul>
     </section>
