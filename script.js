@@ -283,6 +283,7 @@ const cubicBezier_p2t = (p, c2, c3) => {
     const c = 3 * c2;
     const d = -p;
     const solutions = cardano(a, b, c, d);
+    console.log(a, b, c, d, solutions);
     // 実数解のみ返す
     return solutions.filter(sol => sol.imag === 0).map(sol => sol.real);
 };
@@ -315,4 +316,5 @@ export class Easing {
         // t → x
         return t.map(t_ => cubicBezier_t2p(t_, c2x, c3x));
     }
+    static cubicBezier_t2p = cubicBezier_t2p
 };

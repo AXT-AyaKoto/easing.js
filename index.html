@@ -45,14 +45,14 @@
             }
             // 薄灰 : 0までと1からの線
             ctx.strokeStyle = "#aaa";
-            ctx.lineWidth = 10 / 1000;
+            ctx.lineWidth = 16 / 1000;
             ctx.stroke(new Path2D(`M-0.5 0 H0 Z`));
             ctx.stroke(new Path2D(`M1 1 H1.5 Z`));
             // 白 : SVG Path 3次ベジェ曲線コマンドで描画
             ctx.strokeStyle = "#fff";
             ctx.stroke(new Path2D(`M0 0 C ${ctrlPts.join(" ")} 1 1`));
             // 赤 : x=-0.5からx=1.5まで0.01ごとに、yの値を計算して点を描画
-            ctx.fillStyle = "#f44";
+            ctx.fillStyle = "#f22";
             console.groupCollapsed(`[${ctrlPts.map(x => x.toFixed(2)).join(", ")}] x => y`);
             for (let i = 0; i <= 100; i++) {
                 const x = i / 100;
@@ -66,8 +66,8 @@
             }
             console.groupEnd("x");
             console.groupCollapsed(`[${ctrlPts.map(x => x.toFixed(2)).join(", ")}] y => x`);
-            // 青 : y=-0からy=1まで0.01ごとに、xの値を計算して点を描画
-            ctx.fillStyle = "#44f";
+            // 緑 : y=-0からy=1まで0.01ごとに、xの値を計算して点を描画
+            ctx.fillStyle = "#2f2";
             for (let i = 0; i <= 100; i++) {
                 const y = i / 100;
                 const xs = Easing.invert(y, ctrlPts);
@@ -79,6 +79,21 @@
                 console.log(`y = ${y.toFixed(2)} => x = [${xs.map(x => x.toFixed(2)).join(", ")}]`);
             }
             console.groupEnd("y");
+            // 青 : t=0からt=1まで0.01ごとに、xとyの値を計算して線を描画
+            ctx.strokeStyle = "#22f";
+            ctx.lineWidth = 8 / 1000;
+            for (let i = 0; i <= 100; i++) {
+                const t = i / 100;
+                const x = Easing.cubicBezier_t2p(t, ctrlPts[0], ctrlPts[2]);
+                const y = Easing.cubicBezier_t2p(t, ctrlPts[1], ctrlPts[3]);
+                if (i === 0) {
+                    ctx.beginPath();
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.stroke();
         };
         redraw(Easing.getCtrlPts(selectName.value));
         // select要素のchangeイベントでグラフ描画
