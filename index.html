@@ -43,6 +43,9 @@
                 ctx.stroke(new Path2D(`M${p.toFixed(1)} -0.5 V1.5 Z`));
                 ctx.stroke(new Path2D(`M-0.5 ${p.toFixed(1)} H1.5 Z`));
             }
+            ctx.fillStyle = "#444";
+            ctx.fill(new Path2D(`M0.95 0.03 L1 0 L 0.95 -0.03 Z`));
+            ctx.fill(new Path2D(`M0.03 0.95 L0 1 L -0.03 0.95 Z`));
             // 薄灰 : 0までと1からの線
             ctx.strokeStyle = "#aaa";
             ctx.lineWidth = 16 / 1000;
