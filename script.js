@@ -218,8 +218,8 @@ export class Easing {
     /** @type {(x: number, fn: [number, number, number, number]|string) => number[]} - イージングをかける */
     static convert(x, fn) {
         // x<=0なら0、x>=1なら1を返す
-        if (x <= 0) return 0;
-        if (x >= 1) return 1;
+        if (x <= 0) return [0];
+        if (x >= 1) return [1];
         // 制御点を取得
         const ctrlPt = (typeof fn === "string") ? ctrlPts[fn] : fn;
         const [c2x, c2y, c3x, c3y] = ctrlPt;
@@ -231,8 +231,8 @@ export class Easing {
     /** @type {(y: number, fn: [number, number, number, number]|string) => number[]} - イージングを外す */
     static invert(y, fn) {
         // y<=0なら0、y>=1なら1を返す
-        if (y <= 0) return 0;
-        if (y >= 1) return 1;
+        if (y <= 0) return [0];
+        if (y >= 1) return [1];
         // 制御点を取得
         const ctrlPt = (typeof fn === "string") ? ctrlPts[fn] : fn;
         const [c2x, c2y, c3x, c3y] = ctrlPt;
