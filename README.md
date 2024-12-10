@@ -12,13 +12,24 @@
 
 ## Usage
 
-- `globalThis.Easing`からアクセスできます。
-- `Easing.getList()` : 利用可能なイージング関数の一覧を取得します
-    - Parameters:
-        - (なし)
-    - Returns:
-        - `string[]` : 利用可能なイージング関数の一覧
-
+- `Easing` : イージング関数を提供するクラスです
+    - Static Properties:
+        - `Easing.named_list`: 利用可能なイージング関数の一覧(`String[]`)
+    - Static Methods:
+        - `Easing.getCtrlPts()`: イージング関数の制御点を取得します
+            - Parameters:
+                - `name` : イージング関数の名前(`String`)
+            - Returns: `number[]` : イージング関数の制御点(`[x1, y1, x2, y2]`)
+        - `Easing.convert()`: x→yの変換
+            - Parameters:
+                - `x`: 変換前の値(`number`)
+                - `fn`: イージング関数の名前 or 制御点(`String` or `number[]`)
+            - Returns: `number` : 変換後の値
+        - `Easing.invert()`: y→xの変換(逆関数)
+            - Parameters:
+                - `y`: 変換前の値(`number`)
+                - `fn`: イージング関数の名前 or 制御点(`String` or `number[]`)
+            - Returns: `number` : 変換後の値
 
 ---
 
