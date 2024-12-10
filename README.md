@@ -31,14 +31,6 @@
                 - `fn`: イージング関数の名前 or 制御点(`String` or `number[]`)
             - Returns: `number` : 変換後の値
 
-- `globalThis.Easing`からアクセスできます。
-- `Easing.getList()` : 利用可能なイージング関数の一覧を取得します
-    - Parameters:
-        - (なし)
-    - Returns:
-        - `string[]` : 利用可能なイージング関数の一覧
-
-
 ---
 
 ## License
