@@ -224,7 +224,7 @@ export class Easing {
         const ctrlPt = (typeof fn === "string") ? ctrlPts[fn] : fn;
         const [c2x, c2y, c3x, c3y] = ctrlPt;
         // x → t
-        const t = cubicBezier_p2t(x, c2x, c3x);
+        const t = cubicBezier_p2t(x, c2x, c3x).filter(t => 0 <= t && t <= 1);
         // t → y
         return t.map(t_ => cubicBezier_t2p(t_, c2y, c3y));
     }
@@ -237,7 +237,7 @@ export class Easing {
         const ctrlPt = (typeof fn === "string") ? ctrlPts[fn] : fn;
         const [c2x, c2y, c3x, c3y] = ctrlPt;
         // y → t
-        const t = cubicBezier_p2t(y, c2y, c3y);
+        const t = cubicBezier_p2t(y, c2y, c3y).filter(t => 0 <= t && t <= 1);
         // t → x
         return t.map(t_ => cubicBezier_t2p(t_, c2x, c3x));
     }
