@@ -3,6 +3,8 @@
  * copyright (c) 2024- Ayasaka-Koto, All rights reserved.
 ================================================================================================= */
 
+// @ts-check
+
 /** ================================================================================================
  * ベジェ曲線に関する計算に三次方程式が登場するので、三次方程式の解を求める関数を定義
 ================================================================================================= */
@@ -125,6 +127,7 @@ const ctrlPt_In = {
     "Back": [0.36, 0.00, 0.66, -0.56]
 };
 /** @type {Object<string, [number, number, number, number]>} - 方向がOutの名前付きイージングの制御点の値 */
+// @ts-ignore
 const ctrlPt_Out = (() => {
     // Inを[x1, y1, x2, y2]とすると、Outは[1-x2, 1-y2, 1-x1, 1-y1]で計算できる
     const returnObj = {};
@@ -147,6 +150,7 @@ const ctrlPt_InOut = {
     "Back": [0.68, -0.60, 0.32, 1.60]
 };
 /** @type {Object<string, [number, number, number, number]>} - 方向がOutInの名前付きイージングの制御点の値 */
+// @ts-ignore
 const ctrlPt_OutIn = (() => {
     // InOutを[x1, y1, x2, y2]とすると、OutInは[y1, x1, y2, x2]で計算できる
     const returnObj = {};
@@ -157,6 +161,7 @@ const ctrlPt_OutIn = (() => {
     return returnObj;
 })();
 /** @type {Object<string, [number, number, number, number]>} - 名前付きイージングの制御点の値 */
+// @ts-ignore
 const ctrlPts = (() => {
     const returnObj = {};
     easingTypes.forEach(type => {
@@ -200,7 +205,6 @@ const cubicBezier_p2t = (p, c2, c3) => {
     const c = 3 * c2;
     const d = -p;
     const solutions = solveAtMostCubic(a, b, c, d);
-    console.log(a, b, c, d, solutions);
     // 実数解のみ返す
     return solutions;
 };
@@ -215,31 +219,31 @@ export class Easing {
     static getCtrlPts(name) {
         return ctrlPts[name];
     }
-    /** @type {(x: number, fn: [number, number, number, number]|string) => number[]} - イージングをかける */
+    /** @type {(x: number, fn: [number, number, number, number]|string) => number} - イージングをかける */
     static convert(x, fn) {
         // x<=0なら0、x>=1なら1を返す
-        if (x <= 0) return [0];
-        if (x >= 1) return [1];
+        if (x <= 0) return 0;
+        if (x >= 1) return 1;
         // 制御点を取得
         const ctrlPt = (typeof fn === "string") ? ctrlPts[fn] : fn;
         const [c2x, c2y, c3x, c3y] = ctrlPt;
         // x → t
-        const t = cubicBezier_p2t(x, c2x, c3x).filter(t => 0 <= t && t <= 1);
+        const t = cubicBezier_p2t(x, c2x, c3x).filter(t => 0 <= t && t <= 1)[0];
         // t → y
-        return t.map(t_ => cubicBezier_t2p(t_, c2y, c3y));
+        return cubicBezier_t2p(t, c2y, c3y);
     }
-    /** @type {(y: number, fn: [number, number, number, number]|string) => number[]} - イージングを外す */
+    /** @type {(y: number, fn: [number, number, number, number]|string) => number} - イージングを外す */
     static invert(y, fn) {
         // y<=0なら0、y>=1なら1を返す
-        if (y <= 0) return [0];
-        if (y >= 1) return [1];
+        if (y <= 0) return 0;
+        if (y >= 1) return 1;
         // 制御点を取得
         const ctrlPt = (typeof fn === "string") ? ctrlPts[fn] : fn;
         const [c2x, c2y, c3x, c3y] = ctrlPt;
         // y → t
-        const t = cubicBezier_p2t(y, c2y, c3y).filter(t => 0 <= t && t <= 1);
+        const t = cubicBezier_p2t(y, c2y, c3y).filter(t => 0 <= t && t <= 1)[0];
         // t → x
-        return t.map(t_ => cubicBezier_t2p(t_, c2x, c3x));
+        return cubicBezier_t2p(t, c2x, c3x);
     }
     static cubicBezier_t2p = cubicBezier_t2p
 };
