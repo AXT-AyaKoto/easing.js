@@ -28,6 +28,7 @@
         const ctx = canvas.getContext("2d");
         ctx.translate(canvas.width / 4, canvas.height / 4 * 3);
         ctx.scale(canvas.width / 2, -canvas.height / 2);
+        ctx.lineCap = "round";
         /** @type {(ctrlPts: [number, number, number, number]) => void} - グラフ描画(画面更新)をする関数 */
         const redraw = (ctrlPts) => {
             // 今描かれているものを消す
@@ -52,6 +53,7 @@
             ctx.stroke(new Path2D(`M-0.5 0 H0 Z`));
             ctx.stroke(new Path2D(`M1 1 H1.5 Z`));
             // 白 : SVG Path 3次ベジェ曲線コマンドで描画
+            ctx.lineWidth = 16 / 1000;
             if (document.getElementById("input-W").checked) {
                 ctx.strokeStyle = "#fff";
                 ctx.stroke(new Path2D(`M0 0 C ${ctrlPts.join(" ")} 1 1`));
@@ -105,16 +107,42 @@
                 }
                 ctx.stroke();
             }
+            // 灰 : 制御点の座標と補助線
+            ctx.strokeStyle = "#888";
+            ctx.lineWidth = 4 / 1000;
+            ctx.stroke(new Path2D(`M0 0 L${ctrlPts[0]} ${ctrlPts[1]}Z`));
+            ctx.stroke(new Path2D(`M1 1 L${ctrlPts[2]} ${ctrlPts[3]}Z`));
+            ctx.strokeRect(ctrlPts[0] - 0.02, ctrlPts[1] - 0.02, 0.04, 0.04);
+            ctx.strokeRect(ctrlPts[2] - 0.02, ctrlPts[3] - 0.02, 0.04, 0.04);
         };
         redraw(Easing.getCtrlPts(selectName.value));
+        // 有効な方の値を取得して描画する関数
+        const whenChange = () => {
+            console.log("whenChange");
+            const ctrlPts = document.getElementById("useCtrlPts").checked ? [
+                parseFloat(document.getElementById("input-0").value),
+                parseFloat(document.getElementById("input-1").value),
+                parseFloat(document.getElementById("input-2").value),
+                parseFloat(document.getElementById("input-3").value),
+            ] : Easing.getCtrlPts(selectName.value);
+            console.log(ctrlPts);
+            redraw(ctrlPts);
+        };
+        // useCtrlPtsのchangeイベント : CtrlPtsとselectNameの入力有効無効切替
+        document.getElementById("useCtrlPts").addEventListener("change", () => {
+            document.querySelectorAll("input[type=number]").forEach(input => {
+                input.disabled = !document.getElementById("useCtrlPts").checked;
+            });
+            selectName.disabled = document.getElementById("useCtrlPts").checked;
+        });
         // select要素のchangeイベントでグラフ描画
         selectName.addEventListener("change", () => {
-            redraw(Easing.getCtrlPts(selectName.value));
+            whenChange();
         });
         // input要素のchangeイベントでグラフ描画
         document.querySelectorAll("input").forEach(input => {
             input.addEventListener("change", () => {
-                redraw(Easing.getCtrlPts(selectName.value));
+                whenChange();
             });
         });
     </script>
@@ -126,12 +154,39 @@
         <h2>Easing Settings</h2>
         <ul>
             <li>
-                <label for="select-name">Name</label>
-                <select id="select-name"></select>
+                Select Easing Method
+                <ul>
+                    <li>
+                        <label for="select-name">Name</label>
+                        <select id="select-name"></select>
+                    </li>
+                    <li>
+                        <label for="useCtrlPts">Use Ctrl Points</label>
+                        <input type="checkbox" id="useCtrlPts">
+                        <ul>
+                            <li>
+                                <label for="input-0">Ctrl Point 1 - X</label>
+                                <input type="number" id="input-0" value="0" step="0.01" min="0" max="1" disabled>
+                            </li>
+                            <li>
+                                <label for="input-1">Ctrl Point 1 - Y</label>
+                                <input type="number" id="input-1" value="0" step="0.01" min="0" max="1" disabled>
+                            </li>
+                            <li>
+                                <label for="input-2">Ctrl Point 2 - X</label>
+                                <input type="number" id="input-2" value="1" step="0.01" min="0" max="1" disabled>
+                            </li>
+                            <li>
+                                <label for="input-3">Ctrl Point 2 - Y</label>
+                                <input type="number" id="input-3" value="1" step="0.01" min="0" max="1" disabled>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
             </li>
             <li>
                 <label for="input-W">SVG Path (白)</label>
-                <input type="checkbox" id="input-W">
+                <input type="checkbox" id="input-W" checked>
             </li>
             <li>
                 <label for="input-R">x → t → y (赤)</label>
