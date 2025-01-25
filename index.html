@@ -64,13 +64,11 @@
                 console.groupCollapsed(`[${ctrlPts.map(x => x.toFixed(2)).join(", ")}] x => y`);
                 for (let i = 0; i <= 100; i++) {
                     const x = i / 100;
-                    const ys = Easing.convert(x, ctrlPts);
-                    ys.forEach(y => {
-                        ctx.beginPath();
-                        ctx.arc(x, y, 7 / 1000, 0, 2 * Math.PI);
-                        ctx.fill();
-                    });
-                    console.log(`x = ${x.toFixed(2)} => y = [${ys.map(y => y.toFixed(2)).join(", ")}]`);
+                    const y = Easing.convert(x, ctrlPts);
+                    ctx.beginPath();
+                    ctx.arc(x, y, 7 / 1000, 0, 2 * Math.PI);
+                    ctx.fill();
+                    console.log(`x = ${x.toFixed(2)} => y = ${y}`);
                 }
                 console.groupEnd("x");
             }
@@ -80,13 +78,11 @@
                 console.groupCollapsed(`[${ctrlPts.map(x => x.toFixed(2)).join(", ")}] y => x`);
                 for (let i = 0; i <= 100; i++) {
                     const y = i / 100;
-                    const xs = Easing.invert(y, ctrlPts);
-                    xs.forEach(x => {
-                        ctx.beginPath();
-                        ctx.arc(x, y, 7 / 1000, 0, 2 * Math.PI);
-                        ctx.fill();
-                    });
-                    console.log(`y = ${y.toFixed(2)} => x = [${xs.map(x => x.toFixed(2)).join(", ")}]`);
+                    const x = Easing.invert(y, ctrlPts);
+                    ctx.beginPath();
+                    ctx.arc(x, y, 7 / 1000, 0, 2 * Math.PI);
+                    ctx.fill();
+                    console.log(`y = ${y.toFixed(2)} => x = ${x}`);
                 }
                 console.groupEnd("y");
             }
